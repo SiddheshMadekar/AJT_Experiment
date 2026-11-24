@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Time Chat Application</title>
+</head>
+<body>
+    <h2>Real Time Chat Application</h2>
+
+    <input type="text" id="username" placeholder="Enter your name">
+    <button onclick="connect()">Connect</button>
+
+    <br><br>
+
+    <div id="chatBox"
+         style="border:1px solid black; height:200px; width:350px; overflow:auto;">
+    </div>
+
+    <br>
+
+    <input type="text" id="message" placeholder="Enter message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var ws;
+
+        function connect() {
+            var name = document.getElementById("username").value;
+
+            if (name.trim() === "") {
+                alert("Please enter your name");
+                return;
+            }
+
+            ws = new WebSocket("ws://localhost:8081/ChatApp/chat");
+
+            ws.onopen = function() {
+                ws.send(name + " joined the chat");
+            };
+
+            ws.onmessage = function(event) {
+                var box = document.getElementById("chatBox");
+                box.innerHTML += "<p>" + event.data + "</p>";
+                box.scrollTop = box.scrollHeight;
+            };
+
+            ws.onerror = function() {
+                alert("Connection error. Check the server.");
+            };
+        }
+
+        function sendMessage() {
+            var message = document.getElementById("message").value;
+
+            if (ws && ws.readyState === WebSocket.OPEN &&
+                message.trim() !== "") {
+                ws.send(document.getElementById("username").value
+                        + ": " + message);
+                document.getElementById("message").value = "";
+            } else {
+                alert("Connect first and enter a message");
+            }
+        }
+    </script>
+</body>
+</html>
